@@ -22,9 +22,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".FirstTimeActivity">
-
-        </activity>
         <activity android:name=".TestActivity"
             android:parentActivityName=".MainActivity">
 

@@ -1,12 +1,14 @@
 package com.example.sanderpool.programmeren9;
 
 import android.content.Intent;
-import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.provider.Settings;
+import android.support.v4.app.NavUtils;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.MenuItem;
 import android.view.View;
 
 public class MainActivity extends AppCompatActivity {
@@ -19,31 +21,31 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+        Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
+        setSupportActionBar(myToolbar);
 
-        listener = new LocationListener() {
-            @Override
-            public void onLocationChanged(Location location) {
-//                t.append("\n " + location.getLongitude() + " " + location.getLatitude());
-            }
+//      Get a support ActionBar corresponding to this toolbar
+        ActionBar ab = getSupportActionBar();
 
-            @Override
-            public void onStatusChanged(String s, int i, Bundle bundle) {
+//        SharedPreferences sharedPreferences =
+//                PreferenceManager.getDefaultSharedPreferences(this);
+//        // Check if we need to display our OnboardingFragment
+//        if (!sharedPreferences.getBoolean(
+//                MyOnboardingFragment.COMPLETED_ONBOARDING_PREF_NAME, false)) {
+//            // The user hasn't seen the OnboardingFragment yet, so show it
+//            startActivity(new Intent(this, OnboardingActivity.class));
+//        }
+    }
 
-            }
-
-            @Override
-            public void onProviderEnabled(String s) {
-
-            }
-
-            @Override
-            public void onProviderDisabled(String s) {
-
-                Intent i = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(i);
-            }
-        };
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     public void testActivity(View view) {
