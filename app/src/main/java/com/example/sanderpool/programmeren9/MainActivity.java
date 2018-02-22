@@ -1,10 +1,13 @@
 package com.example.sanderpool.programmeren9;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.location.Location;
 import android.location.LocationManager;
@@ -13,7 +16,9 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.NavUtils;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -46,13 +51,17 @@ public class MainActivity extends AppCompatActivity implements WeatherServiceCal
     private String c;
     private String C;
 
+    SharedPreferences prefs = null;
 
     AppLocationService appLocationService;
+    private int TAG_CODE_PERMISSION_LOCATION;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        prefs = getSharedPreferences("com.example.sanderpool.programmeren9", MODE_PRIVATE);
 
         Toolbar myToolbar = (Toolbar) findViewById(R.id.my_toolbar);
         setSupportActionBar(myToolbar);
@@ -60,34 +69,52 @@ public class MainActivity extends AppCompatActivity implements WeatherServiceCal
 //      Get a support ActionBar corresponding to this toolbar
         ActionBar ab = getSupportActionBar();
 
-        b = (Button) findViewById(R.id.button);
         t = (TextView) findViewById(R.id.textView);
-
-        LocationManager locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
         appLocationService = new AppLocationService(
                 MainActivity.this);
 
 //        WeatherAPI
-
         weatherIconImageView = (ImageView) findViewById(R.id.weatherIconImageView);
         temperatureTextView = (TextView) findViewById(R.id.temperatureTextView);
         conditionTextView = (TextView) findViewById(R.id.conditionTextView);
         locationTextView = (TextView) findViewById(R.id.locationTextView);
 
-        Location location = appLocationService
-                .getLocation(LocationManager.GPS_PROVIDER);
+        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) ==
+                PackageManager.PERMISSION_GRANTED &&
+                ContextCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED) {
+            Location location = appLocationService
+                    .getLocation(LocationManager.GPS_PROVIDER);
 
-        if (location != null) {
-            double latitude = location.getLatitude();
-            double longitude = location.getLongitude();
-            LocationAddress locationAddress = new LocationAddress();
-            locationAddress.getAddressFromLocation(latitude, longitude,
-                    getApplicationContext(), new GeocoderHandler());
+            if (location != null) {
+                double latitude = location.getLatitude();
+                double longitude = location.getLongitude();
+                LocationAddress locationAddress = new LocationAddress();
+                locationAddress.getAddressFromLocation(latitude, longitude,
+                        getApplicationContext(), new GeocoderHandler());
+            } else {
+                showSettingsAlert();
+            }
         } else {
-            showSettingsAlert();
+            ActivityCompat.requestPermissions(this, new String[]{
+                            Manifest.permission.ACCESS_FINE_LOCATION,
+                            Manifest.permission.ACCESS_COARSE_LOCATION},
+                    TAG_CODE_PERMISSION_LOCATION);
         }
 
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (prefs.getBoolean("firstrun", true)) {
+            // Do first run stuff here then set 'firstrun' as false
+            startActivity(new Intent(this, OnBoardingActivity.class));
+            Log.d("resume", "onResume: we got here lmao");
+            // using the following line to edit/commit prefs
+            prefs.edit().putBoolean("firstrun", false).apply();
+        }
     }
 
     @Override
